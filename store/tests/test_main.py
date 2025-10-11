@@ -1,12 +1,14 @@
 """
 Tests for main application endpoints
 """
+import pytest
 from app.main import app
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
 
+@pytest.mark.unit
 def test_health_check():
     """Test health check endpoint"""
     response = client.get("/health")

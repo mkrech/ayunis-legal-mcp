@@ -11,6 +11,8 @@ from app.models import LegalTextDB, LegalText
 from app.repository import LegalTextRepository
 from app.dependencies import get_legal_text_repository, get_embedding_service_dependency
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def mock_repository():

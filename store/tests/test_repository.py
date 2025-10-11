@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from app.repository import LegalTextRepository, LegalTextFilter
 from app.models import LegalTextDB
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def mock_session():
