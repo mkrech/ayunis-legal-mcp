@@ -1,5 +1,6 @@
 """
-Legal MCP Server
+ABOUTME: Legal MCP Server providing tools for querying German legal texts
+ABOUTME: Integrates with the legal-mcp store API via HTTP transport
 
 A FastMCP server providing tools for querying German legal texts.
 This server integrates with the legal-mcp store API to provide
@@ -42,7 +43,7 @@ async def search_legal_texts(
     code: str = Field(description="Legal code identifier (e.g., 'bgb', 'stgb')"),
     limit: int = Field(default=5, description="Maximum number of results", ge=1, le=20),
     cutoff: float = Field(
-        default=0.5,
+        default=0.7,
         description="Similarity threshold (0-2, lower is more similar)",
         ge=0.0,
         le=2.0,
@@ -155,14 +156,14 @@ async def import_legal_code(
 ) -> str:
     """
     Import a German legal code from Gesetze im Internet.
-    
+
     Downloads and imports a complete legal code into the database,
     including generating embeddings for semantic search. This may
     take several minutes for large codes.
-    
+
     Args:
         code: Legal code identifier (bgb=Civil Code, stgb=Criminal Code)
-    
+
     Returns:
         Success message with import statistics
     """
@@ -174,7 +175,7 @@ async def import_legal_code(
             )
             response.raise_for_status()
             data = response.json()
-            
+
             return f"✓ {data['message']}\nImported {data['texts_imported']} legal texts for code '{data['code']}'"
     except httpx.HTTPError as e:
         logger.error(f"HTTP error importing legal code: {e}")
@@ -184,9 +185,37 @@ async def import_legal_code(
         raise RuntimeError(f"Error importing legal code: {str(e)}")
 
 
+@mcp.tool()
+async def get_available_codes() -> List[str]:
+    """
+    Get all available legal codes in the database.
+
+    Returns a list of legal code identifiers that have been imported
+    and are available for querying and searching.
+
+    Returns:
+        List of available legal code identifiers (e.g., ['bgb', 'stgb', 'gg'])
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{API_BASE_URL}/legal-texts/gesetze-im-internet/codes",
+                timeout=30.0,
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            return data.get("codes", [])
+    except httpx.HTTPError as e:
+        logger.error(f"HTTP error getting available codes: {e}")
+        raise RuntimeError(f"Failed to get available codes: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error getting available codes: {e}")
+        raise RuntimeError(f"Error getting available codes: {str(e)}")
+
+
 # For running with the FastMCP CLI or directly
 if __name__ == "__main__":
-    # Run with stdio transport (default for MCP)
-    # You can also use: mcp.run(transport="http", port=8001)
-    mcp.run()
+    # Run with HTTP transport for network accessibility
+    mcp.run(transport="http", host="0.0.0.0", port=8001)
 

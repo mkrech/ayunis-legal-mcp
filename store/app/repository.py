@@ -139,6 +139,12 @@ class LegalTextRepository:
         result = await self.session.execute(query)
         return len(list(result.scalars().all()))
 
+    async def get_available_codes(self) -> List[str]:
+        """Get all unique legal codes available in the database"""
+        query = select(LegalTextDB.code).distinct().order_by(LegalTextDB.code)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
+
     async def semantic_search(
         self,
         query_embedding: Sequence[float],

@@ -77,6 +77,12 @@ class LegalTextImportResponse(BaseModel):
     code: str
 
 
+class AvailableCodesResponse(BaseModel):
+    """Response model for available legal codes"""
+
+    codes: List[str]
+
+
 @router.post("/gesetze-im-internet/{book}", response_model=LegalTextImportResponse)
 async def import_legal_text(
     book: str,
@@ -167,6 +173,36 @@ async def import_legal_text(
         logger.error(f"Error importing legal text: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500, detail=f"Error importing document: {str(e)}"
+        )
+
+
+@router.get("/gesetze-im-internet/codes", response_model=AvailableCodesResponse)
+async def get_available_codes(
+    repository: LegalTextRepository = Depends(get_legal_text_repository),
+):
+    """
+    Get all available legal codes in the database
+
+    Returns a list of unique legal code identifiers that have been
+    imported into the database. Use these codes with other endpoints
+    to query or search legal texts.
+
+    Returns:
+        List of available legal code identifiers (e.g., ['bgb', 'stgb', 'gg'])
+
+    Raises:
+        HTTPException: If database query fails
+    """
+    try:
+        logger.info("Fetching available legal codes")
+        codes = await repository.get_available_codes()
+        logger.info(f"Found {len(codes)} available legal codes")
+        return AvailableCodesResponse(codes=codes)
+
+    except Exception as e:
+        logger.error(f"Error fetching available codes: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching available codes: {str(e)}"
         )
 
 
@@ -276,7 +312,7 @@ async def semantic_search_legal_texts(
     q: str = Query(..., description="Search query text", min_length=1),
     limit: int = Query(10, description="Maximum number of results", ge=1, le=100),
     cutoff: float = Query(
-        0.5,
+        0.7,
         description="Maximum cosine distance threshold (0-2, lower is more similar). Only return results with distance <= cutoff.",
         ge=0.0,
         le=2.0,
