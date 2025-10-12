@@ -2,7 +2,7 @@
 
 ## Implementation Status
 
-**✅ PHASE 1 COMPLETE** - Core infrastructure and list commands fully implemented and tested.
+**✅ ALL PHASES COMPLETE** - Full CLI implementation with all commands implemented and tested.
 
 ### Implementation Guidelines
 
@@ -23,14 +23,16 @@ Based on requirements clarification:
 - ✅ Project structure created (cli/, cli/commands/, tests/cli/)
 - ✅ setup.py with CLI entry point
 - ✅ Core modules: config.py, client.py, output.py, main.py
-- ✅ List commands: `list codes` and `list catalog` (table and JSON output)
-- ✅ 28 unit tests (all passing)
-- ✅ Integration test against real Store API
+- ✅ All commands implemented:
+  - `list codes` and `list catalog` (table and JSON output)
+  - `import` - Import legal codes with spinner progress
+  - `query` - Query texts by code, section, and sub-section
+  - `search` - Semantic search with similarity scores
+- ✅ 49 unit tests (all passing)
+- ✅ Integration tested against real Store API
 
-### Next Steps
-- [ ] Implement import commands
-- [ ] Implement query commands
-- [ ] Implement search commands
+### Implementation Complete
+All planned commands are now fully implemented and tested.
 
 ## Overview
 
@@ -131,18 +133,16 @@ if __name__ == "__main__":
     app()
 ```
 
-### 2. HTTP Client (`cli/client.py`) - ✅ IMPLEMENTED (Partial)
+### 2. HTTP Client (`cli/client.py`) - ✅ IMPLEMENTED
 
 **Implemented methods:**
 - ✅ `__init__()`, `close()`, `__enter__()`, `__exit__()` - Context manager support
 - ✅ `health_check()` - Check if Store API is reachable
 - ✅ `list_codes()` - Get list of imported codes
-- ✅ `list_catalog()` - Get importable codes catalog (GET /legal-texts/gesetze-im-internet/catalog)
-
-**TODO methods:**
-- [ ] `import_code(code: str)` - Import a legal code (POST to /gesetze-im-internet/{code})
-- [ ] `query_texts(code, section, sub_section)` - Query legal texts (GET /gesetze-im-internet/{code})
-- [ ] `search_texts(code, query, limit, cutoff)` - Semantic search (GET /gesetze-im-internet/{code}/search)
+- ✅ `list_catalog()` - Get importable codes catalog
+- ✅ `import_code(code: str)` - Import a legal code
+- ✅ `query_texts(code, section, sub_section)` - Query legal texts
+- ✅ `search_texts(code, query, limit, cutoff)` - Semantic search
 
 ```python
 # ABOUTME: HTTP client for Store API communication
@@ -320,17 +320,14 @@ def get_api_url() -> str:
     return url if url else "http://localhost:8000"
 ```
 
-### 4. Output Formatting (`cli/output.py`) - ✅ IMPLEMENTED (Partial)
+### 4. Output Formatting (`cli/output.py`) - ✅ IMPLEMENTED
 
 **Implemented functions:**
 - ✅ `print_json()` - Print data as formatted JSON
 - ✅ `print_codes_list()` - Print codes list as table
 - ✅ `print_catalog()` - Print catalog as table (code and title columns only)
-
-**TODO functions:**
-- [ ] `print_import_result()` - Print import result as table
-- [ ] `print_query_results()` - Print query results as table (with text truncation for readability)
-- [ ] `print_search_results()` - Print search results as table (with text truncation for readability)
+- ✅ `print_query_results()` - Print query results as table (with text truncation for readability)
+- ✅ `print_search_results()` - Print search results as table (with text truncation for readability)
 
 ```python
 # ABOUTME: Output formatting utilities
@@ -529,7 +526,7 @@ def list_catalog(
             raise typer.Exit(1)
 ```
 
-#### Import Command (`cli/commands/import_cmd.py`) - ⏳ TODO
+#### Import Command (`cli/commands/import_cmd.py`) - ✅ IMPLEMENTED
 
 ```python
 # ABOUTME: Import command implementation
@@ -602,7 +599,7 @@ def import_codes(
             console.print(f"\n[bold green]Success:[/bold green] Imported {len(codes)} code(s)")
 ```
 
-#### Query Command (`cli/commands/query.py`)
+#### Query Command (`cli/commands/query_cmd.py`) - ✅ IMPLEMENTED
 
 ```python
 # ABOUTME: Query command implementation
@@ -647,7 +644,7 @@ def query_texts(
             raise typer.Exit(1)
 ```
 
-#### Search Command (`cli/commands/search.py`)
+#### Search Command (`cli/commands/search_cmd.py`) - ✅ IMPLEMENTED
 
 ```python
 # ABOUTME: Search command implementation
@@ -828,7 +825,7 @@ Followed strict **Test-Driven Development (TDD)**:
 4. Run test to confirm it passes
 5. Refactor if needed
 
-### Test Coverage (28 tests, all passing ✅)
+### Test Coverage (49 tests, all passing ✅)
 
 **Unit Tests** (Mock dependencies, test CLI logic):
 - `tests/cli/test_config.py` - 3 tests for configuration loading
@@ -840,14 +837,23 @@ Followed strict **Test-Driven Development (TDD)**:
 - `tests/cli/test_list_cmd.py` - 10 tests for list commands
   - `list codes`: Success case, API unreachable, JSON output, custom API URL, exception handling
   - `list catalog`: Success case, API unreachable, JSON output, custom API URL, exception handling
+- `tests/cli/test_import_cmd.py` - 7 tests for import command
+  - Single/multiple imports, API unreachable, JSON output, validation errors, server errors, custom API URL
+- `tests/cli/test_query_cmd.py` - 7 tests for query command
+  - Query all texts, section filter, section+subsection filters, API unreachable, JSON output, custom API URL, exception handling
+- `tests/cli/test_search_cmd.py` - 7 tests for search command
+  - Basic search, custom limit, custom cutoff, API unreachable, JSON output, custom API URL, exception handling
 - `tests/cli/test_main.py` - 2 tests for main app
   - Help display, command registration
 
 **Integration Tests** (Real Store API):
 - Manual testing against running Store API
-- Verified `legal-mcp list codes` works with real data
-- Verified `legal-mcp list catalog` works with real data (6,844 entries)
-- Verified both table and JSON output formats for both commands
+- Verified all commands work with real data:
+  - `legal-mcp list codes` and `legal-mcp list catalog` (6,844 entries)
+  - `legal-mcp query <code>` with section filters
+  - `legal-mcp search <code> <query>` with semantic search
+  - `legal-mcp import --code <code>` (spinner progress display)
+- Verified both table and JSON output formats for all commands
 
 ### Test Files Structure
 ```
@@ -857,6 +863,9 @@ tests/cli/
 ├── test_client.py      # HTTP client tests (mocked httpx)
 ├── test_output.py      # Output formatting tests
 ├── test_list_cmd.py    # List command tests (mocked client)
+├── test_import_cmd.py  # Import command tests (mocked client)
+├── test_query_cmd.py   # Query command tests (mocked client)
+├── test_search_cmd.py  # Search command tests (mocked client)
 └── test_main.py        # Main app tests
 ```
 
@@ -883,7 +892,7 @@ TypeError: Parameter.make_metavar() missing 1 required positional argument: 'ctx
 
 ## Usage Examples
 
-### Working Commands (Phase 1 - List Commands)
+### All Commands Available
 ```bash
 # List imported codes (table format)
 legal-mcp list codes
@@ -897,24 +906,44 @@ legal-mcp list catalog
 # List catalog (JSON format)
 legal-mcp list catalog --json
 
-# Use custom API URL
+# Import a single legal code
+legal-mcp import --code bgb
+
+# Import multiple legal codes
+legal-mcp import --code bgb --code stgb
+
+# Import with JSON output
+legal-mcp import --code bgb --json
+
+# Query all texts for a code
+legal-mcp query bgb
+
+# Query with section filter
+legal-mcp query bgb --section "§ 1"
+
+# Query with section and sub-section filters
+legal-mcp query bgb --section "§ 1" --sub-section "1"
+
+# Query with JSON output
+legal-mcp query bgb --json
+
+# Semantic search
+legal-mcp search bgb "Kaufvertrag"
+
+# Search with custom limit
+legal-mcp search bgb "Kaufvertrag" --limit 5
+
+# Search with custom similarity cutoff
+legal-mcp search bgb "Kaufvertrag" --cutoff 0.5
+
+# Search with JSON output
+legal-mcp search bgb "Kaufvertrag" --json
+
+# Use custom API URL for any command
 legal-mcp list codes --api-url http://custom:8000
-legal-mcp list catalog --api-url http://custom:8000
+legal-mcp import --code bgb --api-url http://custom:8000
 
 # Use environment variable for API URL
 export LEGAL_API_BASE_URL=http://custom:8000
 legal-mcp list codes
-legal-mcp list catalog
-```
-
-### Coming Soon
-```bash
-# Import codes (not yet implemented)
-legal-mcp import --code bgb
-
-# Query texts (not yet implemented)
-legal-mcp query bgb --section "§ 1"
-
-# Search texts (not yet implemented)
-legal-mcp search bgb "Kaufvertrag"
 ```

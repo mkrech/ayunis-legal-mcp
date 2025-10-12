@@ -70,3 +70,88 @@ class LegalMCPClient:
         response = self.client.get("/legal-texts/gesetze-im-internet/catalog")
         response.raise_for_status()
         return response.json()
+
+    def import_code(self, code: str) -> Dict[str, Any]:
+        """
+        Import a legal code from gesetze-im-internet.de
+
+        Args:
+            code: Legal code identifier (e.g., 'bgb', 'stgb')
+
+        Returns:
+            Dictionary with import results
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns an error status
+        """
+        response = self.client.post(f"/legal-texts/gesetze-im-internet/{code}")
+        response.raise_for_status()
+        return response.json()
+
+    def query_texts(
+        self,
+        code: str,
+        section: Optional[str] = None,
+        sub_section: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Query legal texts by code, section, and sub-section
+
+        Args:
+            code: Legal code identifier (e.g., 'bgb', 'stgb')
+            section: Optional section filter (e.g., '§ 1')
+            sub_section: Optional sub-section filter (e.g., '1')
+
+        Returns:
+            Dictionary with query results
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns an error status
+        """
+        params = {}
+        if section:
+            params["section"] = section
+        if sub_section:
+            params["sub_section"] = sub_section
+
+        response = self.client.get(
+            f"/legal-texts/gesetze-im-internet/{code}",
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def search_texts(
+        self,
+        code: str,
+        query: str,
+        limit: int = 10,
+        cutoff: float = 0.7
+    ) -> Dict[str, Any]:
+        """
+        Perform semantic search on legal texts
+
+        Args:
+            code: Legal code identifier (e.g., 'bgb', 'stgb')
+            query: Search query text
+            limit: Maximum number of results (default: 10)
+            cutoff: Similarity cutoff threshold (default: 0.7)
+
+        Returns:
+            Dictionary with search results
+
+        Raises:
+            httpx.HTTPStatusError: If the API returns an error status
+        """
+        params = {
+            "q": query,
+            "limit": limit,
+            "cutoff": cutoff
+        }
+
+        response = self.client.get(
+            f"/legal-texts/gesetze-im-internet/{code}/search",
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()

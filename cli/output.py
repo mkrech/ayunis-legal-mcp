@@ -51,3 +51,55 @@ def print_catalog(catalog: dict):
         table.add_row(entry["code"], entry["title"])
 
     console.print(table)
+
+
+def print_query_results(results: dict):
+    """
+    Print query results as table with truncated text
+
+    Args:
+        results: Query response with 'count' and 'results' fields
+    """
+    items = results.get("results", [])
+    table = Table(title=f"Query Results (Count: {results['count']})")
+    table.add_column("Section", style="cyan")
+    table.add_column("Sub-Section", style="yellow")
+    table.add_column("Text", style="white", no_wrap=False)
+
+    for item in items:
+        # Truncate text to 100 characters for table display
+        text = item["text"]
+        display_text = text[:100] + "..." if len(text) > 100 else text
+        table.add_row(item["section"], item["sub_section"], display_text)
+
+    console.print(table)
+
+
+def print_search_results(results: dict):
+    """
+    Print search results as table with similarity scores and truncated text
+
+    Args:
+        results: Search response with 'query', 'code', 'count', and 'results' fields
+    """
+    items = results.get("results", [])
+    table = Table(
+        title=f"Search Results for '{results['query']}' in {results['code']} (Count: {results['count']})"
+    )
+    table.add_column("Section", style="cyan")
+    table.add_column("Sub-Section", style="yellow")
+    table.add_column("Similarity", style="green")
+    table.add_column("Text", style="white", no_wrap=False)
+
+    for item in items:
+        # Truncate text to 80 characters for table display
+        text = item["text"]
+        display_text = text[:80] + "..." if len(text) > 80 else text
+        table.add_row(
+            item["section"],
+            item["sub_section"],
+            f"{item['similarity_score']:.3f}",
+            display_text
+        )
+
+    console.print(table)
