@@ -3,6 +3,7 @@ Database connection and models
 """
 
 from typing import AsyncGenerator, Generator
+from urllib.parse import quote_plus
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, Session
@@ -10,16 +11,20 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# Build database URLs directly
+# URL-encode the username and password to handle special characters
+encoded_user = quote_plus(settings.postgres_user)
+encoded_password = quote_plus(settings.postgres_password)
+
+# Build database URLs with properly encoded credentials
 # Sync URL for Alembic migrations (uses psycopg2)
 SYNC_DATABASE_URL = (
-    f"postgresql://{settings.postgres_user}:{settings.postgres_password}"
+    f"postgresql://{encoded_user}:{encoded_password}"
     f"@{settings.postgres_host}:{settings.postgres_port}/{settings.postgres_db}"
 )
 
 # Async URL for FastAPI application (uses asyncpg)
 ASYNC_DATABASE_URL = (
-    f"postgresql+asyncpg://{settings.postgres_user}:{settings.postgres_password}"
+    f"postgresql+asyncpg://{encoded_user}:{encoded_password}"
     f"@{settings.postgres_host}:{settings.postgres_port}/{settings.postgres_db}"
 )
 
