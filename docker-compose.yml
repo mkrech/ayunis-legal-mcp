@@ -31,6 +31,10 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-legal_mcp}:${POSTGRES_PASSWORD:-legal_mcp_password}@${POSTGRES_HOST:-postgres}:5432/${POSTGRES_DB:-legal_mcp_db}
+      - POSTGRES_USER=${POSTGRES_USER:-legal_mcp}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-legal_mcp_password}
+      - POSTGRES_DB=${POSTGRES_DB:-legal_mcp_db}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
     ports:
       - "8000:8000"
     depends_on:
