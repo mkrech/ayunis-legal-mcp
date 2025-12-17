@@ -1,6 +1,6 @@
 # Legal MCP - Architecture and Development Guide
 
-## Project Overview
+## Project Overview-
 
 Legal MCP is a semantic search system for German legal texts with two main components:
 
