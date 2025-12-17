@@ -23,11 +23,11 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database settings
+    postgres_user: str = Field(default="postgres")
     postgres_host: str = Field(default="postgres")
     postgres_port: int = Field(default=5432)
     postgres_password: str = Field(default="postgres_password")
     postgres_db: str = Field(default="legal_mcp_db")
-    # Note: postgres_user is hard-coded to 'postgres' in database.py
 
     # Ollama settings
     ollama_base_url: str = Field(
@@ -37,10 +37,10 @@ class Settings(BaseSettings):
         default="", description="Ollama authentication token"
     )
     ollama_timeout: int = Field(
-        default=120,
+        default=300,
         gt=0,
-        le=600,
-        description="Request timeout in seconds for Ollama API calls (max 600s / 10 minutes)",
+        le=3600,
+        description="Request timeout in seconds for Ollama API calls (max 3600s / 60 minutes)",
     )
     ollama_batch_size: int = Field(
         default=50,

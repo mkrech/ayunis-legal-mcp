@@ -5,6 +5,10 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
+> **Development Mode:** This project is configured for **local development** without Docker.
+> PostgreSQL and Ollama run directly on the host machine.
+> See [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md) for setup instructions.
+
 A comprehensive system for searching and analyzing German legal texts using vector embeddings and semantic search, consisting of:
 
 - **Store API**: FastAPI backend with PostgreSQL, pgvector, and Ollama embeddings
@@ -101,10 +105,15 @@ A comprehensive system for searching and analyzing German legal texts using vect
 
 ## Quick Start
 
-### Prerequisites
+> 📖 **For local development setup**, see [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)
+> 
+> 📦 **For Docker setup**, see [DOCKER_SETUP.md](DOCKER_SETUP.md)
 
-- Docker and Docker Compose
-- Ollama (local or remote endpoint for embeddings)
+### Prerequisites (Local Development)
+
+- PostgreSQL (installed and running locally)
+- Ollama (installed and running locally)
+- Python 3.10+ with uv package manager
 - Git
 
 > ⚠️ **Important: Required Ollama Model**

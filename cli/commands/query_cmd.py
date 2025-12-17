@@ -12,7 +12,7 @@ app = typer.Typer()
 
 @app.command()
 def query_texts(
-    code: str = typer.Argument(..., help="Legal code (e.g., bgb)"),
+    code: str = typer.Option(..., "--code", "-c", help="Legal code (e.g., bgb)"),
     section: Optional[str] = typer.Option(None, "--section", "-s", help="Section filter (e.g., '§ 1')"),
     sub_section: Optional[str] = typer.Option(None, "--sub-section", help="Sub-section filter"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),

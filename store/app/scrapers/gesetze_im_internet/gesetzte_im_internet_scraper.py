@@ -3,6 +3,7 @@ from typing import List
 import requests
 import zipfile
 import io
+import re
 from .xml_parser import GermanLegalXMLParser
 
 
@@ -25,6 +26,18 @@ class GesetzteImInternetScraper(Scraper):
                 and norm.textdaten.text
                 and norm.textdaten.text.formatted_text
             ):
+                # Skip obsolete/repealed sections marked with "(weggefallen)"
+                # Check both title and text content
+                if norm.metadaten.titel and "(weggefallen)" in norm.metadaten.titel.lower():
+                    continue
+                
+                # Check if all paragraphs contain only "(weggefallen)"
+                paragraphs = norm.textdaten.text.formatted_text.paragraphs
+                if paragraphs and all(
+                    p.strip().lower() == "(weggefallen)" for p in paragraphs
+                ):
+                    continue
+                
                 if norm.metadaten.enbez:
                     # Group paragraphs by sub_section to avoid duplicates
                     # (multiple paragraphs with same sub_section get concatenated)
@@ -37,9 +50,15 @@ class GesetzteImInternetScraper(Scraper):
 
                     # Create one LegalText per unique sub_section
                     for sub_section, texts in sub_section_texts.items():
+                        # Skip sub-sections that only contain "(weggefallen)" or "(aufgehoben)"
+                        # Matches: "(weggefallen)", "(4)(weggefallen)", "(1a) (weggefallen)", "(aufgehoben)", etc.
+                        combined_text = "\n\n".join(texts)
+                        if re.match(r'^\s*(\([\da-z]+\)\s*)?\((weggefallen|aufgehoben)\)\s*$', combined_text, re.IGNORECASE):
+                            continue
+                        
                         extracted_legal_texts.append(
                             LegalText(
-                                text="\n\n".join(texts),
+                                text=combined_text,
                                 # we use the code from the url (e.g. rag_1) instead of the jurabk (e.g. RAG 1)
                                 # so we know what to query later
                                 code=code,

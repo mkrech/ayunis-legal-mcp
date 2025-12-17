@@ -16,7 +16,8 @@ class LegalMCPClient:
             base_url: Base URL for the Store API (default: http://localhost:8000)
         """
         self.base_url = base_url
-        self.client = httpx.Client(base_url=base_url, timeout=300.0)
+        # Longer timeout for import operations (20 minutes)
+        self.client = httpx.Client(base_url=base_url, timeout=1200.0)
 
     def close(self):
         """Close the HTTP client"""

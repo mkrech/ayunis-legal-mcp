@@ -11,10 +11,10 @@ app = typer.Typer()
 
 @app.command()
 def search_texts(
-    code: str = typer.Argument(..., help="Legal code (e.g., bgb)"),
-    query: str = typer.Argument(..., help="Search query"),
+    code: str = typer.Option(..., "--code", "-c", help="Legal code (e.g., bgb)"),
+    query: str = typer.Option(..., "--query", "-q", help="Search query"),
     limit: int = typer.Option(10, "--limit", "-l", help="Maximum results (1-100)"),
-    cutoff: float = typer.Option(0.7, "--cutoff", "-c", help="Similarity cutoff (0-2)"),
+    cutoff: float = typer.Option(0.7, "--cutoff", help="Similarity cutoff (0-2)"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     api_url: str = typer.Option(None, "--api-url", envvar="LEGAL_API_BASE_URL")
 ):

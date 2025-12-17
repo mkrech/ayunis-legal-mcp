@@ -201,6 +201,24 @@ async def import_legal_text(
 
         logger.info(f"Scraped {len(legal_texts)} legal text sections")
 
+        # Filter out empty texts
+        valid_texts = [
+            lt for lt in legal_texts 
+            if lt.text and lt.text.strip()
+        ]
+        filtered_count = len(legal_texts) - len(valid_texts)
+        if filtered_count > 0:
+            logger.info(f"Filtered out {filtered_count} empty sections")
+        legal_texts = valid_texts
+
+        if not legal_texts:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No valid legal texts found for code: {book} (all sections were obsolete)",
+            )
+
+        logger.info(f"Processing {len(legal_texts)} valid legal text sections")
+
         # Step 2: Generate embeddings for all texts (batch processing)
         logger.info("Generating embeddings...")
         texts_to_embed = [lt.text for lt in legal_texts]
